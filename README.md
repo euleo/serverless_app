@@ -36,7 +36,7 @@ serverless deploy -v
 
 1) saveUser
 
-curl -H \"Content-Type: application/json\" -X POST -d "{\"firstname\":\"myname\",\"surname\": \"mysurname\", \"username\":\"myusername\"}" https://amazonaws/dev/user
+curl -H \"Content-Type: application/json\" -X POST -d "{\"firstname\":\"myfirstname\",\"surname\": \"mysurname\", \"username\":\"myusername\"}" https://amazonaws/dev/user
 
 
 2) SaveAppointment
@@ -66,7 +66,7 @@ curl -H \"Content-Type: application/json\" -X DELETE -d "{\"userId\":\"{userId}\
 
 7)putUser
 
-curl -H \"Content-Type: application/json\" -X PUT -d "{\"firstname\":\"myname2\",\"surname\":\"mysurname2\",\"username\":\"myusername2\"}" https://amazonaws/dev/user/{userId}
+curl -H \"Content-Type: application/json\" -X PUT -d "{\"firstname\":\"myfirstname2\",\"surname\":\"mysurname2\",\"username\":\"myusername2\"}" https://amazonaws/dev/user/{userId}
 
 
 8)putAppointment
