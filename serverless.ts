@@ -86,6 +86,50 @@ const serverlessConfiguration: Serverless = {
           }
         }
       ]
+    },
+    deleteUser: {
+      handler: 'handler.deleteUser',
+      events: [
+        {
+          http: {
+            method: 'delete',
+            path: 'user/{id}',
+          }
+        }
+      ]
+    },
+    deleteAppointment: {
+      handler: 'handler.deleteAppointment',
+      events: [
+        {
+          http: {
+            method: 'delete',
+            path: 'appointment/{id}',
+          }
+        }
+      ]
+    },
+    updateUser: {
+      handler: 'handler.updateUser',
+      events: [
+        {
+          http: {
+            method: 'put',
+            path: 'user/{id}',
+          }
+        }
+      ]
+    },
+    updateAppointment: {
+      handler: 'handler.updateAppointment',
+      events: [
+        {
+          http: {
+            method: 'put',
+            path: 'appointment/{id}',
+          }
+        }
+      ]
     }
   },
   resources: {

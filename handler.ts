@@ -104,10 +104,9 @@ export const saveAppointment: APIGatewayProxyHandler = async (event, _context) =
           TableName: process.env.DYNAMO_TABLE,
           Item: {
             PK: userId,
-            SK: 'appointment',
+            SK: 'appointment_' + uuid.v1(),
             dt_start,
-            dt_end,
-            appointmentId: uuid.v1() 
+            dt_end
           },
         };
 
@@ -134,7 +133,7 @@ export const saveAppointment: APIGatewayProxyHandler = async (event, _context) =
 export const getAppointments: APIGatewayProxyHandler = async (event, _context) => {
   const params = {
     TableName: process.env.DYNAMO_TABLE,
-    FilterExpression: 'SK = :sk',
+    FilterExpression: 'begins_with(SK, :sk)',
     ExpressionAttributeValues: {
       ':sk': 'appointment'
     }
@@ -167,6 +166,148 @@ export const getUsers: APIGatewayProxyHandler = async (event, _context) => {
       body: JSON.stringify(data),
     };
   } catch (err) {
+    return getErrorResponse(err);
+  }
+};
+
+export const deleteUser: APIGatewayProxyHandler = async (event, _context) => {
+  //delete user and his appointments
+  const params = {
+    TableName: process.env.DYNAMO_TABLE,
+    Key: {
+      PK: event.pathParameters.id,
+      SK: 'user'
+    },
+  };
+
+  try {
+    await dynamoDB.delete(params).promise();
+
+    const params1 = {
+      TableName: process.env.DYNAMO_TABLE,
+      FilterExpression: 'begins_with(SK, :sk)',
+      ExpressionAttributeValues: {
+        ':sk': 'appointment'
+      }
+    };
+
+    const appointments = await dynamoDB.scan(params1).promise();
+    for (let i = 0; i < appointments['Items'].length; i++) {
+      const params2 = {
+        TableName: process.env.DYNAMO_TABLE,
+        Key: {
+          "PK": event.pathParameters.id,
+          "SK": appointments['Items'][i]['SK']
+        }
+      };
+      await dynamoDB.delete(params2).promise();
+    } 
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify("User and his appointments succesfully deleted"),
+    };
+
+  } catch (err) {
+    console.error(err);
+    return getErrorResponse(err);
+  }
+};
+
+export const deleteAppointment: APIGatewayProxyHandler = async (event, _context) => {
+  const requestBody = JSON.parse(event.body);
+  const PK = requestBody.userId;
+
+  //delete appointment
+  const params = {
+    TableName: process.env.DYNAMO_TABLE,
+    Key: {
+      "PK": PK,
+      "SK": event.pathParameters.id
+    }
+  };
+
+  try {
+    await dynamoDB.delete(params).promise();
+    return {
+      statusCode: 200,
+      body: JSON.stringify('Appointment successfully deleted'),
+    };
+  } catch (err) {
+    console.error(err);
+    return getErrorResponse(err);
+  }
+};
+
+export const updateUser: APIGatewayProxyHandler = async (event, _context) => {
+  const requestBody = JSON.parse(event.body);
+  const firstname = requestBody.firstname;
+  const surname = requestBody.surname;
+
+  //update User by PK and SK
+  const params = {
+    TableName: process.env.DYNAMO_TABLE,
+    Item: {
+      PK: event.pathParameters.id,
+      SK: 'user',
+      firstname,
+      surname
+    },
+  };
+
+  try {
+    await dynamoDB.put(params).promise();
+    return {
+      statusCode: 200,
+      body: JSON.stringify(params.Item),
+    };
+  } catch (err) {
+    console.error(err);
+    return getErrorResponse(err);
+  }
+};
+
+export const updateAppointment: APIGatewayProxyHandler = async (event, _context) => {
+  const requestBody = JSON.parse(event.body);
+  const PK = requestBody.userId;
+  const dt_start = requestBody.dt_start;
+  const dt_end = requestBody.dt_end;
+
+  //check if new appointment overlaps
+  const params2 = {
+    TableName: process.env.DYNAMO_TABLE,
+    FilterExpression: ':dt_start < dt_end AND :dt_end > dt_start',
+    ExpressionAttributeValues: {
+      ':dt_start': dt_start,
+      ':dt_end': dt_end
+    }
+  };
+
+  try {
+    const data = await dynamoDB.scan(params2).promise();
+
+    if (data['Count'] == 0) {
+      //update Appointment
+      const params = {
+        TableName: process.env.DYNAMO_TABLE,
+        Item: {
+          PK: PK,
+          SK: event.pathParameters.id,
+          dt_start,
+          dt_end
+        }
+      };
+
+      await dynamoDB.put(params).promise();
+      return {
+        statusCode: 200,
+        body: JSON.stringify('Appointment successfully updated'),
+      };
+    } else {
+      return getErrorResponse("Appointment overlaps");
+    }
+  } catch (err) {
+    console.error(err);
     return getErrorResponse(err);
   }
 };
