@@ -32,7 +32,7 @@ npm install serverless -g
 
 serverless deploy -v
 
-##Esempi di chiamate dal prompt dei comandi di windows##
+##Esempi di chiamate dal prompt dei comandi di windows (nelle URL sostituire amazonaws con l'URL corretta)##
 
 1) saveUser
 
