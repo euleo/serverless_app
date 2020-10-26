@@ -9,13 +9,17 @@ Node.js
 AWS CLI and configure it
 
 ##DynamoDB##
+
 Una sola tabella per salvare utenti e appuntamenti
 
 Chiave: (PK, SK)
+
 PK usato per ID utente
+
 SK usato per user/ID appuntamento
 
 User ha i campi: firstname, surname, username
+
 Appointment ha i campi: dt_start, dt_end (FORMATO DATE: 2020-10-25T10:00:00Z)
 
 ##SETUP##
