@@ -243,6 +243,7 @@ export const updateUser: APIGatewayProxyHandler = async (event, _context) => {
   const requestBody = JSON.parse(event.body);
   const firstname = requestBody.firstname;
   const surname = requestBody.surname;
+  const username = requestBody.username;
 
   //update User by PK and SK
   const params = {
@@ -251,7 +252,8 @@ export const updateUser: APIGatewayProxyHandler = async (event, _context) => {
       PK: event.pathParameters.id,
       SK: 'user',
       firstname,
-      surname
+      surname,
+      username
     },
   };
 
