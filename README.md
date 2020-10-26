@@ -8,7 +8,7 @@ Node.js
 
 AWS CLI
 
-##DynamoDB##
+#DynamoDB
 
 Una sola tabella per salvare utenti e appuntamenti
 
