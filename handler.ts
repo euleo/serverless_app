@@ -4,11 +4,13 @@ import * as uuid from "uuid";
 import 'source-map-support/register';
 
 type userRequestParams = {
-  name: string;
+  firstname: string;
   surname: string;
+  username: string;
 };
 
 type appointmentRequestParams = {
+  username: string;
   dt_start: string;
   dt_end: string;
 };
@@ -26,23 +28,40 @@ const getErrorResponse = (errorMessage: string) => {
 
 export const saveUser: APIGatewayProxyHandler = async (event, _context) => {
   const requestBody: userRequestParams = JSON.parse(event.body);
-  const { name, surname } = requestBody;
+  const { firstname, surname, username } = requestBody;
+
+  const params1 = {
+    TableName: process.env.DYNAMO_TABLE,
+    FilterExpression: 'username = :u',
+    ExpressionAttributeValues: {
+      ':u': username
+    }
+  };
 
   try {
-    const params = {
-      TableName: process.env.DYNAMO_TABLE,
-      Item: {
-        PK: uuid.v1(),
-        SK: 'user',
-        name,
-        surname
-      },
-    };
-    await dynamoDB.put(params).promise();
-    return {
-      statusCode: 200,
-      body: JSON.stringify(params.Item),
-    };
+    //check if user already exists
+    const user = await dynamoDB.scan(params1).promise();
+
+    if (user['Count'] == 0) {
+      const params = {
+        TableName: process.env.DYNAMO_TABLE,
+        Item: {
+          PK: uuid.v1(),
+          SK: 'user',
+          firstname,
+          surname,
+          username
+        },
+      };
+      await dynamoDB.put(params).promise();
+      return {
+        statusCode: 200,
+        body: JSON.stringify(params.Item),
+      };
+    } else {
+      return getErrorResponse("User already exist");
+    }
+
   } catch (err) {
     console.error(err);
     return getErrorResponse(err);
@@ -51,46 +70,61 @@ export const saveUser: APIGatewayProxyHandler = async (event, _context) => {
 
 export const saveAppointment: APIGatewayProxyHandler = async (event, _context) => {
   const requestBody: appointmentRequestParams = JSON.parse(event.body);
-  const { dt_start, dt_end } = requestBody;
+  const { username, dt_start, dt_end } = requestBody;
 
-  const params = {
+  const params1 = {
     TableName: process.env.DYNAMO_TABLE,
-    FilterExpression: ':dt_start < dt_end AND :dt_end > dt_start',
+    FilterExpression: 'username = :u',
     ExpressionAttributeValues: {
-      ':dt_start': dt_start,
-      ':dt_end': dt_end
+      ':u': username
     }
   };
 
   try {
-    //check if appointment overlaps
-    const data = await dynamoDB.scan(params).promise();
+    //check if user exists and get PK
+    const user = await dynamoDB.scan(params1).promise();
 
-    if (data['Count'] == 0) {
-      try {
-        const params1 = {
+    if (user['Count'] > 0) {
+      let userId = user['Items'][0]['PK'];
+
+      const params2 = {
+        TableName: process.env.DYNAMO_TABLE,
+        FilterExpression: ':dt_start < dt_end AND :dt_end > dt_start',
+        ExpressionAttributeValues: {
+          ':dt_start': dt_start,
+          ':dt_end': dt_end
+        }
+      };
+
+      //check if appointment overlaps
+      const data = await dynamoDB.scan(params2).promise();
+
+      if (data['Count'] == 0) {
+        const params3 = {
           TableName: process.env.DYNAMO_TABLE,
           Item: {
-            PK: uuid.v1(),
+            PK: userId,
             SK: 'appointment',
             dt_start,
             dt_end
           },
         };
 
-        await dynamoDB.put(params1).promise();
+        await dynamoDB.put(params3).promise();
 
         return {
           statusCode: 200,
-          body: JSON.stringify(params1.Item),
+          body: JSON.stringify(params3.Item),
         };
-      } catch (err) {
-        console.error(err);
-        return getErrorResponse(err);
+
+      } else {
+        return getErrorResponse("Appointment overlaps");
       }
+
     } else {
-      return getErrorResponse("Appointment overlaps");
+      return getErrorResponse("User doesn't exist");
     }
+
   } catch (err) {
     return getErrorResponse(err);
   }
