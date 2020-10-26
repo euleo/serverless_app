@@ -10,7 +10,7 @@ type userRequestParams = {
 };
 
 type appointmentRequestParams = {
-  username: string;
+  userId: string;
   dt_start: string;
   dt_end: string;
 };
@@ -70,22 +70,22 @@ export const saveUser: APIGatewayProxyHandler = async (event, _context) => {
 
 export const saveAppointment: APIGatewayProxyHandler = async (event, _context) => {
   const requestBody: appointmentRequestParams = JSON.parse(event.body);
-  const { username, dt_start, dt_end } = requestBody;
+  const { userId, dt_start, dt_end } = requestBody;
 
   const params1 = {
     TableName: process.env.DYNAMO_TABLE,
-    FilterExpression: 'username = :u',
+    FilterExpression: 'PK = :pk AND SK = :sk',
     ExpressionAttributeValues: {
-      ':u': username
+      ':pk': userId,
+      ':sk': 'user'
     }
   };
 
   try {
-    //check if user exists and get PK
+    //check if user exists
     const user = await dynamoDB.scan(params1).promise();
 
     if (user['Count'] > 0) {
-      let userId = user['Items'][0]['PK'];
 
       const params2 = {
         TableName: process.env.DYNAMO_TABLE,
@@ -106,7 +106,8 @@ export const saveAppointment: APIGatewayProxyHandler = async (event, _context) =
             PK: userId,
             SK: 'appointment',
             dt_start,
-            dt_end
+            dt_end,
+            appointmentId: uuid.v1() 
           },
         };
 
