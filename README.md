@@ -1,6 +1,7 @@
 # serverless_app
 
 ##Requisiti##
+
 AWS account
 Node.js
 AWS CLI and configure it
