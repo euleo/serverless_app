@@ -54,21 +54,21 @@ curl https://amazonaws/dev/users
 curl https://amazonaws/dev/appointments
 
 
-5)deleteUser (with all his appointments)
+5) deleteUser (with all his appointments)
 
 curl -X DELETE https://amazonaws/dev/user/{userId}
 
 
-6)deleteAppointment
+6) deleteAppointment
 
 curl -H \"Content-Type: application/json\" -X DELETE -d "{\"userId\":\"{userId}\"}" https://amazonaws/dev/appointment/{appointmentId}
 
 
-7)putUser
+7) putUser
 
 curl -H \"Content-Type: application/json\" -X PUT -d "{\"firstname\":\"myfirstname2\",\"surname\":\"mysurname2\",\"username\":\"myusername2\"}" https://amazonaws/dev/user/{userId}
 
 
-8)putAppointment
+8) putAppointment
 
 curl -H \"Content-Type: application/json\" -X PUT -d "{\"userId\":\"{userId}\",\"dt_start\":\"2020-10-25T22:00:00Z\",\"dt_end\": \"2020-10-25T22:30:00Z\"}" https://amazonaws/dev/appointment/{appointmentId}
