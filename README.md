@@ -6,7 +6,7 @@ AWS account
 
 Node.js
 
-AWS CLI and configure it
+AWS CLI
 
 ##DynamoDB##
 
