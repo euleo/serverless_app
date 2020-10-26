@@ -18,9 +18,9 @@ PK usato per userId
 
 SK usato per user/appuntamentoId
 
-User ha i campi: firstname, surname, username
+Un utente ha i campi: firstname, surname, username
 
-Appointment ha i campi: dt_start, dt_end (FORMATO DATE: 2020-10-25T10:00:00Z)
+Un appuntamento ha i campi: dt_start, dt_end (FORMATO DATE: 2020-10-25T10:00:00Z)
 
 ##SETUP##
 
