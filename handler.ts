@@ -185,11 +185,12 @@ export const deleteUser: APIGatewayProxyHandler = async (event, _context) => {
 
     const params1 = {
       TableName: process.env.DYNAMO_TABLE,
-      FilterExpression: 'begins_with(SK, :sk)',
+      FilterExpression: 'PK = :pk AND begins_with(SK, :sk)',
       ExpressionAttributeValues: {
+        ':pk': event.pathParameters.id,
         ':sk': 'appointment'
       }
-    };
+    }
 
     const appointments = await dynamoDB.scan(params1).promise();
     for (let i = 0; i < appointments['Items'].length; i++) {

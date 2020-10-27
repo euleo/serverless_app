@@ -34,6 +34,8 @@ serverless deploy -v
 
 ##Esempi di chiamate dal prompt dei comandi di windows (nelle URL sostituire amazonaws con l'URL corretta)##
 
+Fare escape degli apici
+
 1) saveUser
 
 curl -H \"Content-Type: application/json\" -X POST -d "{\"firstname\":\"myfirstname\",\"surname\": \"mysurname\", \"username\":\"myusername\"}" https://amazonaws/dev/user
